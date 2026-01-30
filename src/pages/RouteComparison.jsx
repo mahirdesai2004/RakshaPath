@@ -1,6 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Clock, MapPin, CheckCircle, AlertTriangle, Phone } from 'lucide-react';
+import { Shield, Clock, MapPin, CheckCircle } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet';
+import L from 'leaflet';
+
+// Fix for default marker icon in React-Leaflet
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 const RouteComparison = () => {
     const navigate = useNavigate();
@@ -20,11 +35,22 @@ const RouteComparison = () => {
         return () => clearInterval(interval);
     }, []);
 
+    // Mock Route Data (Start: Mumbai Library, End: Home mockup)
+    const positionStart = [19.0760, 72.8777]; // Mumbai coordinates mock
+    const positionEnd = [19.0860, 72.8877];
+
+    // A slightly curved "safe" path
+    const routePath = [
+        [19.0760, 72.8777],
+        [19.0780, 72.8790],
+        [19.0800, 72.8820],
+        [19.0830, 72.8850],
+        [19.0860, 72.8877]
+    ];
+
     return (
-        <div className="fade-in" style={{
+        <div className="fade-in responsive-row" style={{
             height: '90vh',
-            display: 'flex',
-            gap: '20px',
             maxWidth: '1200px',
             margin: '0 auto',
             position: 'relative'
@@ -46,7 +72,7 @@ const RouteComparison = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    zIndex: 100,
+                    zIndex: 1000, // Leaflet uses high z-index
                     animation: 'pulse-sos 2s infinite'
                 }}
             >
@@ -59,6 +85,11 @@ const RouteComparison = () => {
           70% { box-shadow: 0 0 0 10px rgba(41, 128, 185, 0); }
           100% { box-shadow: 0 0 0 0 rgba(41, 128, 185, 0); }
         }
+        .leaflet-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 20px;
+        }
       `}</style>
 
             {/* Left Panel: Route Info */}
@@ -68,7 +99,8 @@ const RouteComparison = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '1.5rem',
-                overflowY: 'auto'
+                overflowY: 'auto',
+                zIndex: 2 // Ensure above map if overlapped
             }}>
                 {/* Header */}
                 <div>
@@ -151,56 +183,65 @@ const RouteComparison = () => {
                 </button>
             </div>
 
-            {/* Right Panel: Map Placeholder */}
+            {/* Right Panel: Real Map */}
             <div className="glass-panel" style={{
                 flex: '1.5',
-                background: '#e0e0e0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                minHeight: '400px',
+                padding: 0 // Remove padding for full map
             }}>
-                {/* Abstract Map Graphic (CSS only) */}
+                <MapContainer
+                    center={[19.0810, 72.8827]}
+                    zoom={15}
+                    scrollWheelZoom={true}
+                    zoomControl={false}
+                >
+                    {/* Tile Layer: OpenStreetMap */}
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                    />
+                    {/* Markers */}
+                    <Marker position={positionStart}>
+                        <Popup>Start Point</Popup>
+                    </Marker>
+                    <Marker position={positionEnd}>
+                        <Popup>Destination</Popup>
+                    </Marker>
+
+                    {/* Safe Route Polyline */}
+                    <Polyline
+                        positions={routePath}
+                        pathOptions={{ color: 'var(--color-primary)', weight: 6, opacity: 0.8 }}
+                    />
+                    {/* Safety shadow for polyline */}
+                    <Polyline
+                        positions={routePath}
+                        pathOptions={{ color: 'rgba(74, 144, 226, 0.2)', weight: 14 }}
+                    />
+                </MapContainer>
+
+                {/* Navigation Pill */}
                 <div style={{
                     position: 'absolute',
-                    inset: 0,
-                    background: 'url("https://www.transparenttextures.com/patterns/cubes.png"), #f0f0f0',
-                    opacity: 0.5
-                }} />
-
-                {/* Route Line Mock */}
-                <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
-                    <path
-                        d="M 100 400 Q 250 350 300 200 T 500 100"
-                        fill="none"
-                        stroke="var(--color-primary)"
-                        strokeWidth="6"
-                        strokeLinecap="round"
-                        strokeDasharray="10 5"
-                    />
-                    <path
-                        d="M 100 400 Q 250 350 300 200 T 500 100"
-                        fill="none"
-                        stroke="rgba(74, 144, 226, 0.3)"
-                        strokeWidth="14"
-                        strokeLinecap="round"
-                    />
-                    <circle cx="100" cy="400" r="8" fill="var(--color-text-main)" />
-                    <circle cx="500" cy="100" r="8" fill="var(--color-primary)" />
-                </svg>
-
-                <span style={{
-                    position: 'relative',
+                    top: '20px',
+                    left: '20px',
                     background: 'white',
                     padding: '8px 16px',
                     borderRadius: '20px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                    fontWeight: 600,
-                    fontSize: '0.9rem'
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    zIndex: 1000
                 }}>
-                    Live Navigation Active
-                </span>
+                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-safe)', boxShadow: '0 0 0 2px rgba(46, 204, 113, 0.3)' }} />
+                    <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>Live Navigation</span>
+                </div>
             </div>
         </div>
     );
