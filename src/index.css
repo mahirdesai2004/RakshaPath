@@ -1,68 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Role-based Colors */
+  --color-primary: #4A90E2;    /* Soft Blue */
+  --color-secondary: #50E3C2;  /* Teal */
+  --color-accent: #9013FE;     /* Muted Purple */
+  
+  --color-bg-base: #F5F7FA;
+  --color-text-main: #333333;
+  --color-text-muted: #666666;
+  
+  /* Gradients */
+  --gradient-bg: linear-gradient(135deg, #E0F7FA 0%, #E8EAF6 100%);
+  --gradient-card: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.6) 100%);
+  --gradient-overlay: linear-gradient(to bottom, transparent, rgba(74, 144, 226, 0.1));
+  
+  /* Glassmorphism */
+  --glass-blur: 12px;
+  --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Animation Speeds */
+  --anim-slow: 0.6s ease-out;
+  --anim-med: 0.3s ease;
+  
+  /* Safety/Status Colors (Non-alarmist) */
+  --color-safe: #2ECC71;
+  --color-warning: #F5A623;
+  --color-sos: #2980B9; /* Deep calm blue instead of red for SOS */
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  font-family: 'Inter', sans-serif;
+  background: var(--gradient-bg);
+  color: var(--color-text-main);
   min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+a {
+  text-decoration: none;
+  color: inherit;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  border: none;
+  background: none;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Utilities */
+.glass-panel {
+  background: var(--gradient-card);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 20px;
+}
+
+.fade-in {
+  animation: fadeIn var(--anim-slow) forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Input Styles */
+input, select, textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.9);
+  font-size: 1rem;
+  transition: all var(--anim-med);
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+}
+
+/* Responsive Utilities */
+.responsive-row {
+  display: flex;
+  gap: 20px;
+  flex-direction: row;
+}
+
+@media (max-width: 768px) {
+  .responsive-row {
+    flex-direction: column-reverse; 
   }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+  
+  .responsive-row > div:nth-child(2) {
+    min-height: 300px;
   }
 }
